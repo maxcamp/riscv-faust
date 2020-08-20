@@ -21,7 +21,5 @@ object TransformerMain extends App {
   val input = scala.meta.inputs.Input.VirtualFile(path.toString, text)
   implicit val tree = input.parse[Source].get
 
-  val aspect = new InstructionCounterAspect(tree)
-
-  println(aspect().syntax)
+  println(new InstructionCounterAspect(tree)().syntax)
 }
