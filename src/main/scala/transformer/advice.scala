@@ -4,15 +4,14 @@ import scala.meta._
 import scala.meta.contrib._
 
 object Advice {
-
   def around(oldCode: Stat, newCode: Stat) = new Transformer {
-    override def apply(tree: Tree): Tree = {
-      if (tree.isEqual(oldCode)) {
-        newCode
-      } else {
-        super.apply(tree)
+      override def apply(tree: Tree): Tree = {
+        if (tree.isEqual(oldCode)) {
+          newCode
+        } else {
+          super.apply(tree)
+        }
       }
-    }
   }
 
   def before(oldCode: Stat, newCode: Stat) = new Transformer {
@@ -59,7 +58,7 @@ object Advice {
 
     override def apply(tree: Tree): Tree = {
       tree match {
-        //note: ${insertBefore(bodyStats)} is a function call inside the quasiquote
+        //note: ${insertAfter(bodyStats)} is a function call inside the quasiquote
         case template"{ ..$stats } with ..$inits { $self => ..$bodyStats }"
           if bodyStats.exists(_.isEqual(oldCode)) =>
             template"{ ..$stats } with ..$inits { $self => ..${insertAfter(bodyStats)} }"
