@@ -2,10 +2,15 @@ package transformer
 
 import scala.meta._
 import scala.meta.contrib._
+import scala.meta.Term.Block
 
 object Advice {
+
+  //Insert Single Statements
+
   def around(oldCode: Stat, newCode: Stat) = new Transformer {
       override def apply(tree: Tree): Tree = {
+        //TODO: make around advide for a set of statements
         if (tree.isEqual(oldCode)) {
           newCode
         } else {
@@ -16,8 +21,10 @@ object Advice {
 
   def before(oldCode: Stat, newCode: Stat) = new Transformer {
     def insertBefore(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
-      if (stat.isEqual(oldCode))
-        Seq(newCode, oldCode)
+      if (stat.isEqual(oldCode)) newCode match {
+          case q"{ ..$stats }" => stats ++ Seq(oldCode)
+          case _ => Seq(newCode, oldCode)
+        }
       else Seq(stat)
     )
 
@@ -51,8 +58,10 @@ object Advice {
 
   def after(oldCode: Stat, newCode: Stat) = new Transformer {
     def insertAfter(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
-      if (stat.isEqual(oldCode))
-        Seq(oldCode, newCode)
+      if (stat.isEqual(oldCode)) newCode match {
+          case q"{ ..$stats }" => Seq(oldCode) ++ stats
+          case _ => Seq(oldCode, newCode)
+        }
       else Seq(stat)
     )
 
@@ -83,4 +92,5 @@ object Advice {
       }
     }
   }
+
 }
