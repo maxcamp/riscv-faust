@@ -19,6 +19,17 @@ object Advice {
       }
   }
 
+  //for replacing the type
+  def around(oldInit: Init, newStats: Stat) = new Transformer {
+    override def apply(tree: Tree): Tree = {
+      val q"{ ..$stats }" = newStats
+      tree match {
+        case q"new $init" if (init.isEqual(oldInit))=> q"new $init { ..$stats }"
+        case _ => super.apply(tree)
+      }
+    }
+  }
+
   def before(oldCode: Stat, newCode: Stat) = new Transformer {
     def insertBefore(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
       if (stat.isEqual(oldCode)) newCode match {

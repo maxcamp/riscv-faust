@@ -7,37 +7,40 @@ import java.io._
 
 class InstructionCounterAspect (tree: Tree) extends Aspect (tree){
 
-  val csrDefJoinpoint = q"private def haveDCache = tileParams.dcache.get.scratch.isEmpty"
-  val moduleInstallJoinpoint = q"coreMonitorBundle.priv_mode := csr.io.trace(0).priv"
-  val customCSRJoinpoint = q"protected def chickenCSR: Option[CustomCSR] = None"
-  val csrListJoinpoint = q"def decls: Seq[CustomCSR] = bpmCSR.toSeq ++ chickenCSR"
-  val registerDefJoinpoint = q"def suppressCorruptOnGrantData = getOrElse(chickenCSR, _.value(9), false.B)"
+  val CSRJoinpoint = init"CSRFile(perfEvents, coreParams.customCSRs.decls)"
+  val coreJoinpoint = init"Rocket(outer)(outer.p)"
 
-  after(csrDefJoinpoint, q"""
-    override def instructionCountersCSR = {
-    val mask = BigInt(0)
-    Some(CustomCSR(instructionCountersCSRId, mask, Some(mask)))
-  }
-  """)
-
-  after(moduleInstallJoinpoint, q"""
-    val instructionCounters = Module(new InstructionCounters(decode_table))
-    instructionCounters.io.inst := csr.io.trace(0).insn
-    instructionCounters.io.valid := csr.io.trace(0).valid
-    when(io.ptw.customCSRs.flushInstructionCounters) {
-      printf("Instruction counts reset\n")
-      instructionCounters.reset := true.B
+  val CSRExtension = q"""
+    override lazy val io = new CSRFileIO {
+      val customCSRs = Vec(coreParams.customCSRs.decls.size, new CustomCSRIO).asOutput
+      val flushInstructionCounters = Output(Bool())
+      flushInstructionCounters := false.B
     }
-  """)
 
-  after(customCSRJoinpoint, q"""
-    protected def instructionCountersCSRId = 0x800
-    protected def instructionCountersCSR: Option[CustomCSR] = None
-  """)
+    override def generateCustomCSRs {
+      val reg_flushInstructionCounters = new CSreg(0x800, Reg(UInt(xLen.W))) ((reg: Data) => {
+        //kind of magic, but we don't need super
+        when(csr_wen) {
+          reg := wdata
+          io.flushInstructionCounters := true.B
+        }
+      })
+    }"""
 
-  around(csrListJoinpoint, q"def decls: Seq[CustomCSR] = bpmCSR.toSeq ++ chickenCSR ++ instructionCountersCSR")
+    val coreExtenstion = q"""
+    //create a new piece of hardware
+    val instructionCounters = Module(new InstructionCounters(rocketImpl.decode_table))
+    //wire up all the signals we need
+    instructionCounters.io.inst := io.trace(0).insn
+    instructionCounters.io.valid := io.trace(0).valid
+    //define some new behavior to control the hardware
+    when(rocketImpl.csr.io.flushInstructionCounters) {
+      instructionCounters.reset := true.B
+    }"""
 
-  after(registerDefJoinpoint, q"def flushInstructionCounters = getOrElse(instructionCountersCSR, _.wen, false.B)")
+  around(CSRJoinpoint, CSRExtension)
+  around(coreJoinpoint, coreExtenstion)
+
 }
 
 
