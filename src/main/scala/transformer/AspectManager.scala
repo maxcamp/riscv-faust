@@ -12,7 +12,6 @@ class AspectManager (dir: String, aspectFunction: Tree => Tree) {
   }
 
   private def processTree(prevTree: Tree): Tree = {
-    //TODO: don't hard code this
     val newTree = aspectFunction(prevTree)
     if (prevTree.isEqual(newTree)) prevTree //once aspects stop applying return the tree
     else processTree(newTree) //we have just applied aspects, need to check again
@@ -45,7 +44,7 @@ class AspectManager (dir: String, aspectFunction: Tree => Tree) {
 
       val originalTree = input.parse[Source].get
 
-      val finalTree = processTree(originalTree)
+      val finalTree = aspectFunction(originalTree)
 
       //if we've done a transform, write a new file with the new tree
       if (!finalTree.isEqual(originalTree)) {

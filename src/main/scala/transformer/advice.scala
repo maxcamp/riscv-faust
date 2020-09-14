@@ -11,10 +11,18 @@ object Advice {
   def around(oldCode: Stat, newCode: Stat) = new Transformer {
       override def apply(tree: Tree): Tree = {
         //TODO: make around advide for a set of statements
-        if (tree.isEqual(oldCode)) {
-          newCode
-        } else {
-          super.apply(tree)
+        tree match {
+          case q"..$mods def $oldCode[..$tparams](...$paramss): $tpeopt = $expr" => {
+            val newExprTree = super.apply(expr)
+            q"..$mods def $oldCode[..$tparams](...$paramss): $tpeopt = ${newExprTree.asInstanceOf[Term]}"
+          }
+          case _ => {
+            if (tree.isEqual(oldCode)) {
+              newCode
+            } else {
+              super.apply(tree)
+            }
+          }
         }
       }
   }
@@ -24,7 +32,7 @@ object Advice {
     override def apply(tree: Tree): Tree = {
       val q"{ ..$stats }" = newStats
       tree match {
-        case q"new $init" if (init.isEqual(oldInit))=> q"new $init { ..$stats }"
+        case q"new $init" if (init.isEqual(oldInit)) => q"new $init { ..$stats }"
         case _ => super.apply(tree)
       }
     }
@@ -81,23 +89,23 @@ object Advice {
         //note: ${insertAfter(bodyStats)} is a function call inside the quasiquote
         case template"{ ..$stats } with ..$inits { $self => ..$bodyStats }"
           if bodyStats.exists(_.isEqual(oldCode)) =>
-            template"{ ..$stats } with ..$inits { $self => ..${insertAfter(bodyStats)} }"
+            super.apply(template"{ ..$stats } with ..$inits { $self => ..${insertAfter(bodyStats)} }")
 
         case q"{ ..$stats }"
           if stats.exists(_.isEqual(oldCode)) =>
-            q"{ ..${insertAfter(stats)} }"
+            super.apply(q"{ ..${insertAfter(stats)} }")
 
         case q"new { ..$stat } with ..$inits { $self => ..$stats }"
           if stats.exists(_.isEqual(oldCode)) =>
-            q"new { ..$stat } with ..$inits { $self => ..${insertAfter(stats)}}"
+            super.apply(q"new { ..$stat } with ..$inits { $self => ..${insertAfter(stats)}}")
 
         case q"package $eref { ..$stats }"
           if stats.exists(_.isEqual(oldCode)) =>
-            q"package $eref { ..${insertAfter(stats)} }"
+            super.apply(q"package $eref { ..${insertAfter(stats)} }")
 
         case source"..$stats"
           if stats.exists(_.isEqual(oldCode)) =>
-            source"..${insertAfter(stats)}"
+            super.apply(source"..${insertAfter(stats)}")
 
         case _ => super.apply(tree)
       }
