@@ -13,12 +13,12 @@ abstract class Aspect (tree: Tree){
     addAdvice(Advice.around(oldCode, newCode))
   }
 
-  protected def around(oldInit: Init, newStats: Stat) = {
-    addAdvice(Advice.around(oldInit, newStats))
-  }
-
   protected def before (oldCode: Stat, newCode: Stat) = {
     addAdvice(Advice.before(oldCode, newCode))
+  }
+
+  protected def after(oldInit: Init, newStats: Stat, last: Boolean = false) = {
+    addAdvice(Advice.after(oldInit, newStats, last))
   }
 
   protected def after (oldCode: Stat, newCode: Stat) = {

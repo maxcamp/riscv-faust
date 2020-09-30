@@ -27,17 +27,6 @@ object Advice {
       }
   }
 
-  //for replacing the type
-  def around(oldInit: Init, newStats: Stat) = new Transformer {
-    override def apply(tree: Tree): Tree = {
-      val q"{ ..$stats }" = newStats
-      tree match {
-        case q"new $init" if (init.isEqual(oldInit)) => q"new $init { ..$stats }"
-        case _ => super.apply(tree)
-      }
-    }
-  }
-
   def before(oldCode: Stat, newCode: Stat) = new Transformer {
     def insertBefore(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
       if (stat.isEqual(oldCode)) newCode match {
@@ -70,6 +59,21 @@ object Advice {
           if stats.exists(_.isEqual(oldCode)) =>
             source"..${insertBefore(stats)}"
 
+        case _ => super.apply(tree)
+      }
+    }
+  }
+
+  //for replacing the type
+  def after(oldInit: Init, newStats: Stat, last: Boolean = false) = new Transformer {
+    override def apply(tree: Tree): Tree = {
+      val q"{ ..$insertStats }" = newStats
+      tree match {
+        //match short circuits
+        case q"new $init" if (init.isEqual(oldInit) && last) => q"new $init with NoAspect { ..$insertStats }"
+        case q"new $init { ..$stats }" if (init.isEqual(oldInit) && last) => q"new $init with NoAspect { ..${insertStats ++ stats} }"
+        case q"new $init" if (init.isEqual(oldInit)) => q"new $init { ..$insertStats }"
+        case q"new $init { ..$stats }" if (init.isEqual(oldInit)) => q"new $init { ..${insertStats ++ stats} }"
         case _ => super.apply(tree)
       }
     }

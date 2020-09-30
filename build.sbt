@@ -26,37 +26,16 @@ def javacOptionsVersion(scalaVersion: String): Seq[String] = {
   }
 }
 
-name := "Adder"
+name := "ChiselAspects"
 
-version := "3.4-SNAPSHOT"
+version := "0.1"
 
 scalaVersion := "2.12.10"
 
 crossScalaVersions := Seq("2.12.10", "2.11.12")
 
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("snapshots"),
-  Resolver.sonatypeRepo("releases")
-)
-
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-
-// Provide a managed dependency on X if -DXVersion="" is supplied on the command line.
-val defaultVersions = Seq(
-  "chisel-iotesters" -> "1.4.1+",
-  "chiseltest"  -> "0.2.1+"
-  )
-
-//libraryDependencies ++= defaultVersions.map { case (dep, ver) =>
-  //"edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", ver) }
-
-libraryDependencies += "edu.berkeley.cs" %% "chisel3" % "3.4-SNAPSHOT"
-
 scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
 
 javacOptions ++= javacOptionsVersion(scalaVersion.value)
-
-//libraryDependencies += "edu.berkeley.cs" %% "chiseltest" % "0.2.1"
-libraryDependencies += "edu.berkeley.cs" %% "chiseltest" % "0.3-SNAPSHOT" % Test
 
 libraryDependencies += "org.scalameta" %% "scalameta" % "4.3.20"
