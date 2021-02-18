@@ -4,6 +4,7 @@ import scala.meta._
 import scala.meta.contrib._
 import java.io.File
 import java.io._
+import java.nio.file.{Files, Paths, StandardCopyOption}
 
 object AspectManager {
 
@@ -14,15 +15,11 @@ object AspectManager {
     }
 
     def processTree(prevTree: Tree): Tree = {
-      val newTree = aspectFunction(prevTree)
-      if (prevTree.isEqual(newTree)) prevTree //once aspects stop applying return the tree
-      else processTree(newTree) //we have just applied aspects, need to check again
+      //val newTree =
+        aspectFunction(prevTree)
+      //if (prevTree.isEqual(newTree)) prevTree //once aspects stop applying return the tree
+      //else processTree(newTree) //we have just applied aspects, need to check again
     }
-
-    //create the output directory
-    val outputDirName = System.getProperty("user.dir") + "/woven"
-    val outputDir = new File(outputDirName)
-    outputDir.mkdir
 
     //get all the files in the project we want to transform
     val files = getRecursiveListOfFiles(new File(dir))
@@ -48,12 +45,23 @@ object AspectManager {
 
       //if we've done a transform, write a new file with the new tree
       if (!finalTree.isEqual(originalTree)) {
-        val newFile = new File(outputDirName + "/" + file.getName)
+        mv(path.toString, path + "_orig".toString)
+
+        val newFile = new File(path.toString)
         val bw = new BufferedWriter(new FileWriter(newFile))
         bw.write(finalTree.syntax)
         bw.close()
         println("### Transform Applied in " + file.getName + " ###")
       }
     })
+  }
+
+  private def mv(source: String, destination: String): Unit = {
+    val path = Files.move(
+        Paths.get(source),
+        Paths.get(destination),
+        StandardCopyOption.REPLACE_EXISTING
+    )
+    // could return `path`
   }
 }
