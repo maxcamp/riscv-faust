@@ -9,10 +9,6 @@ import java.nio.file.{Files, Paths, StandardCopyOption}
 object AspectManager {
 
   def apply(dir: String)(aspectFunction: Tree => Tree) = {
-    def getRecursiveListOfFiles(dir: File): Array[File] = {
-      val these = dir.listFiles
-      these ++ these.filter(_.isDirectory).flatMap(getRecursiveListOfFiles)
-    }
 
     def processTree(prevTree: Tree): Tree = {
       //val newTree =
@@ -54,6 +50,34 @@ object AspectManager {
         println("### Transform Applied in " + file.getName + " ###")
       }
     })
+  }
+
+  def undo(dir: String) = {
+    //get all the files in the project we want to undo
+    val files = getRecursiveListOfFiles(new File(dir))
+
+    //find all the original files
+    val origFiles = files.filter(file =>
+      file.getName match {
+        case fileName: String if(fileName.endsWith(".scala_orig")) => true
+        case _ => false
+      }
+    )
+
+    //process all the files
+    origFiles.foreach(file => {
+      println("Undo " + file.getName + " ...")
+      val path = file.toString
+      val newPath = path.substring(0, path.length - 5)
+
+      mv(path, newPath)
+    })
+
+  }
+
+  private def getRecursiveListOfFiles(dir: File): Array[File] = {
+    val these = dir.listFiles
+    these ++ these.filter(_.isDirectory).flatMap(getRecursiveListOfFiles)
   }
 
   private def mv(source: String, destination: String): Unit = {

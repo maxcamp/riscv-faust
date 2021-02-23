@@ -7,7 +7,21 @@ import java.io._
 
 object AspectMachine {
   def main(args: Array[String]): Unit = {
-    println("Applyin Aspects")
-    AspectManager("/home/whytheam/Research/chisel/freedom/rocket-chip/src/main/scala")((tree: Tree) => new PerformanceCounterAspect(tree)())
+
+    val dir = "/home/whytheam/Research/chisel/freedom/rocket-chip/src/main/scala"
+
+    if(args.length != 0) {
+      if(args(0) == "apply") {
+        println("Applyin Aspects")
+        AspectManager(dir)((tree: Tree) => new PerformanceCounterAspect(tree)())
+      } else if (args(0) == "undo"){
+        println("Undo Aspects")
+        AspectManager.undo(dir)
+      } else {
+        println("Please indicate either to apply or undo aspects!")
+      }
+    } else {
+      println("Please indicate either to apply or undo aspects!")
+    }
   }
 }
