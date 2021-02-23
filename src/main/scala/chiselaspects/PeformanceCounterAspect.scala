@@ -131,9 +131,9 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
   val stat = q"${mod"override"} val counters = Vec(${numPerfCounters}, new PerfCounterIO)"
   extend (init"CSRFileIO") insert (q"{ $stat }") in (q"class CSRFile") register
 
-  //before (q"buildMappings()") insert (q"val performanceCounters = new PerformanceCounters(perfEventSets, this, ${numPerfCounters}, ${haveBasicCounters})") in (q"class CSRFile") register
+  before (q"buildMappings()") insert (q"val performanceCounters = new PerformanceCounters(perfEventSets, this, ${numPerfCounters}, ${haveBasicCounters})") in (q"class CSRFile") register
 
-  //after(q"buildMappings()") insert q"performanceCounters.buildMappings()" in (q"class CSRFile") register
+  after(q"buildMappings()") insert q"performanceCounters.buildMappings()" in (q"class CSRFile") register
 
-  //before (q"buildDecode()") insert (q"performanceCounters.buildDecode()") in (q"class CSRFile") register
+  before (q"buildDecode()") insert (q"performanceCounters.buildDecode()") in (q"class CSRFile") register
 }

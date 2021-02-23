@@ -25,8 +25,10 @@ class After(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = co
       case _ => super.apply(tree)
      }
     }
+  }
 
-    def applyCode(tree: Tree): Tree = {
+  private def applyCode = new Transformer {
+    override def apply(tree: Tree): Tree = {
       tree match {
         //note: ${insertAfter(bodyStats)} is a function call inside the quasiquote
         case template"{ ..$stats } with ..$inits { $self => ..$bodyStats }"
@@ -46,15 +48,14 @@ class After(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = co
 
         case _ => super.apply(tree)
       }
-
     }
-
-    def insertAfter(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
-      if (stat.isEqual(oldCode)) newCode match {
-          case q"{ ..$stats }" => Seq(oldCode) ++ stats
-          case _ => Seq(oldCode, newCode)
-        }
-      else Seq(stat)
-    )
   }
+
+  private def insertAfter(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
+    if (stat.isEqual(oldCode)) newCode match {
+        case q"{ ..$stats }" => Seq(oldCode) ++ stats
+        case _ => Seq(oldCode, newCode)
+      }
+    else Seq(stat)
+  )
 }

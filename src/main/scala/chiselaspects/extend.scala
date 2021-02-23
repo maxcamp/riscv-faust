@@ -14,7 +14,7 @@ class Extend(oldCode: Init, newCode: Stat = q"source()", context: Defn.Class = c
     new Extend(oldCode, newNewCode, context)
   }
 
-  def advise() = new Transformer {
+  def advise = new Transformer {
     override def apply(tree: Tree): Tree = {
       tree match {
       case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template"
@@ -25,8 +25,10 @@ class Extend(oldCode: Init, newCode: Stat = q"source()", context: Defn.Class = c
       case _ => super.apply(tree)
      }
     }
+  }
 
-    def applyCode(tree: Tree): Tree = {
+  private def applyCode = new Transformer {
+    override def apply(tree: Tree): Tree = {
       val q"{ ..$insertStats }" = newCode
       tree match {
         //match short circuits

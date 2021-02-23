@@ -15,7 +15,7 @@ class Before(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = c
     new Before(oldCode, newNewCode, context)
   }
 
-  def advise() = new Transformer {
+  def advise = new Transformer {
     override def apply(tree: Tree): Tree = {
       tree match {
       case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template"
@@ -26,8 +26,10 @@ class Before(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = c
       case _ => super.apply(tree)
      }
     }
+  }
 
-    def applyCode(tree: Tree): Tree = {
+  private def applyCode = new Transformer {
+    override def apply(tree: Tree): Tree = {
       tree match {
         //note: ${insertBefore(bodyStats)} is a function call inside the quasiquote
         case template"{ ..$stats } with ..$inits { $self => ..$bodyStats }"
@@ -53,14 +55,14 @@ class Before(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = c
         case _ => super.apply(tree)
       }
     }
-
-    def insertBefore(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
-      if (stat.isEqual(oldCode)) newCode match {
-          case q"{ ..$stats }" => stats ++ Seq(oldCode)
-          case _ => Seq(newCode, oldCode)
-        }
-      else Seq(stat)
-    )
   }
+
+  private def insertBefore(bodyStats: List[Stat]): List[Stat] = bodyStats.flatMap(stat =>
+    if (stat.isEqual(oldCode)) newCode match {
+        case q"{ ..$stats }" => stats ++ Seq(oldCode)
+        case _ => Seq(newCode, oldCode)
+      }
+    else Seq(stat)
+  )
 
 }
