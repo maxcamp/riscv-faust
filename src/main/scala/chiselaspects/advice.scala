@@ -7,7 +7,7 @@ package object const {
   val NullClass = q"class __NotAClass"
 }
 
-abstract class Advice(oldCode: Stat, newCode: Stat, context: Defn.Class)
+abstract class Advice(newCode: Stat, context: Defn.Class)
   (implicit aspect: Aspect) {
 
   //the subclass must tell us what to do with a new context

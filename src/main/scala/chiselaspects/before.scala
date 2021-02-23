@@ -5,7 +5,7 @@ import scala.meta.contrib._
 
 
 class Before(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = const.NullClass)(implicit aspect: Aspect)
-  extends Advice(oldCode: Stat, newCode: Stat, context: Defn.Class) {
+  extends Advice(newCode, context) {
 
   def in(newContext: Defn.Class): Advice = {
     new Before(oldCode, newCode, newContext)

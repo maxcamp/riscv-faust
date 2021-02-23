@@ -8,6 +8,7 @@ abstract class Aspect (tree: Tree){
 
   protected def before(oldCode: Stat) = new Before(oldCode)
   protected def after(oldCode: Stat) = new After(oldCode)
+  protected def extend(oldCode: Init) = new Extend(oldCode)
 
   /* private def addAdvice(advice: Transformer) {
     adviceSequence = adviceSequence :+ advice

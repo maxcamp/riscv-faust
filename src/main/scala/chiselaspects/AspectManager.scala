@@ -45,12 +45,12 @@ object AspectManager {
 
       //if we've done a transform, write a new file with the new tree
       if (!finalTree.isEqual(originalTree)) {
-        mv(path.toString, path + "_orig".toString)
+        //mv(path.toString, path + "_orig".toString)
 
-        val newFile = new File(path.toString)
-        val bw = new BufferedWriter(new FileWriter(newFile))
-        bw.write(finalTree.syntax)
-        bw.close()
+        //val newFile = new File(path.toString)
+        //val bw = new BufferedWriter(new FileWriter(newFile))
+        //bw.write(finalTree.syntax)
+        //bw.close()
         println("### Transform Applied in " + file.getName + " ###")
       }
     })
