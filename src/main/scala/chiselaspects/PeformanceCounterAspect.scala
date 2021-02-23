@@ -11,14 +11,18 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
   val haveBasicCounters = true
 
   //modifying Frontend
-  /* after(init"FrontendIO", q"""{
+  extend (init"FrontendIO") insert (q"""{
     val perf = new Bundle {
       val acquire = Bool()
       val tlbMiss = Bool()
     }.asInput
-  }""") */
+  }""") in (q"class FrontendModule") register
 
-  //TODO: Add a gateClock to Frontend and then add the IO
+  before (q"gateClock") insert (q"""
+    io.cpu.perf := icache.io.perf
+    io.cpu.perf.tlbMiss := io.ptw.req.fire()
+    io.errors := icache.io.errors
+  """) in (q"class FrontendModule") register
 
   //modifying DCache
   after(q"gateClock()") insert (q"""
