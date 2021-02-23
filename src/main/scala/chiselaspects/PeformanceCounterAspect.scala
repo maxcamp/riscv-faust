@@ -21,7 +21,7 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
   //TODO: Add a gateClock to Frontend and then add the IO
 
   //modifying DCache
-  /* after(q"gateClock", q"""
+  after(q"gateClock()") insert (q"""
     io.cpu.perf.acquire := edge.done(tl_out_a)
     io.cpu.perf.release := edge.done(tl_out_c)
     io.cpu.perf.grant := tl_out.d.valid && d_last
@@ -54,11 +54,10 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
       }
       cached_grant_wait && !near_end_of_refill
     }
-  """) */
+  """) in (q"class DCacheModuleImpl") register
 
   //modifying Rocket Core
-  /* after(q"val perfEvents = new EventSets()", q"""
-
+  after(q"val perfEvents = new EventSets()") insert (q"""
   val instEvents = new EventSet((mask, hits) => Mux(wb_xcpt, mask(0), wb_valid &&
     pipelineIDToWB((mask & hits).orR)), 18)
   instEvents.addEvent("exception", () => false.B, 0)
@@ -124,9 +123,9 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
   sysEvents.addEvent("DTLB miss", () => io.dmem.perf.tlbMiss, 4)
   sysEvents.addEvent("L2 TLB miss", () => io.ptw.perf.l2miss, 5)
   perfEvents.addEventSet(sysEvents)
-  """) */
+  """) in (q"class RocketImpl") register
 
-  //after(q"hookUpCore()", q"csr.io.counters foreach { c => c.inc := RegNext(perfEvents.evaluate(c.eventSel)) }")
+  after (q"hookUpCore()") insert (q"csr.io.counters foreach { c => c.inc := RegNext(perfEvents.evaluate(c.eventSel)) }") in (q"class RocketImpl") register
 
   //modifying CSR
   //val stat = q"${mod"override"} val counters = Vec(${numPerfCounters}, new PerfCounterIO)"
@@ -134,7 +133,7 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
 
   before (q"buildMappings()") insert (q"val performanceCounters = new PerformanceCounters(perfEventSets, this, ${numPerfCounters}, ${haveBasicCounters})") in (q"class CSRFile") register
 
-  //after(q"buildMappings()", q"performanceCounters.buildMappings()")
+  after(q"buildMappings()") insert q"performanceCounters.buildMappings()" in (q"class CSRFile") register
 
   before (q"buildDecode()") insert (q"performanceCounters.buildDecode()") in (q"class CSRFile") register
 }

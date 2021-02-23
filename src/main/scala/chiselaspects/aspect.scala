@@ -6,7 +6,8 @@ abstract class Aspect (tree: Tree){
   implicit val aspect = this
   var adviceSequence = Seq[Transformer]()
 
-  def before(oldCode: Stat) = new Before(oldCode) 
+  protected def before(oldCode: Stat) = new Before(oldCode)
+  protected def after(oldCode: Stat) = new After(oldCode)
 
   /* private def addAdvice(advice: Transformer) {
     adviceSequence = adviceSequence :+ advice
