@@ -10,6 +10,44 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
   val numPerfCounters = 28
   val haveBasicCounters = true
 
+  //modifying PTW
+  extend (q"class DatapathPTWIO") insert (init"HasPTWPerfEvents") register
+
+  //these are too fragile, but fine for now
+  after (q"l2_refill_wire := l2_refill") insert (q"""
+    io.dpath.perf.l2miss := false
+    io.dpath.perf.l2hit := false
+  """) in (q"class PTW") register
+
+  //these are too fragile, but fine for now
+  before (q"val s2_pte = Wire(new PTE)") insert (q"""
+    io.dpath.perf.l2miss := s2_valid && !(s2_hit_vec.orR)
+    io.dpath.perf.l2hit := s2_hit
+  """) in (q"class PTW") register
+
+  after (q"buildControlStateMachine()") insert (q"""
+    io.dpath.perf.pte_miss := false
+    io.dpath.perf.pte_hit := pte_hit && (state === s_req) && !io.dpath.perf.l2hit
+    assert(!(io.dpath.perf.l2hit && (io.dpath.perf.pte_miss || io.dpath.perf.pte_hit)),
+    "PTE Cache Hit/Miss Performance Monitor Events are lower priority than L2TLB Hit event")
+
+    if (state == s_wait2) {
+      io.dpath.perf.pte_miss := count < pgLevels-1
+    }
+  """) in (q"class PTW") register
+
+  //modifying ICache
+  extend (q"class ICacheBundle") insert (init"HasICachePerfEvents") register
+
+  after (q"buildRefill()") insert (q"io.perf.acquire := refill_fire") in (q"class ICacheModule") register
+
+  //modifying NDBCache
+  before (q"gateClock()") insert (q"""
+    io.cpu.acquire := edge.done(tl_out.a)
+    io.cpu.release := edge.done(tl_out.c)
+    io.cpu.tlbMiss := io.ptw.req.fire()
+  """) in (q"class NonBlockingDCacheModule") register
+
   //modifying HellaCacheArbiter
   after (q"connectRequestorToMem()") insert (q"""
     for (i <- 0 until n) {
