@@ -8,7 +8,8 @@ abstract class Aspect (tree: Tree){
 
   protected def before(oldCode: Stat) = new Before(oldCode)
   protected def after(oldCode: Stat) = new After(oldCode)
-  protected def extend(oldCode: Init) = new Extend(oldCode)
+  protected def extend(oldCode: Init) = new ExtendInit(oldCode)
+  protected def extend(oldCode: Defn.Class) = new ExtendClass(oldCode)
 
   def apply(): Tree = {
     adviceSequence.foldLeft(tree){ (newTree, transform) => { transform(newTree) } }

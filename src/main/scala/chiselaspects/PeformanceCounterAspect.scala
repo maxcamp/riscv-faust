@@ -10,15 +10,20 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
   val numPerfCounters = 28
   val haveBasicCounters = true
 
-  //modifying Frontend
-  extend (init"FrontendIO") insert (q"""{
-    val perf = new Bundle {
-      val acquire = Bool()
-      val tlbMiss = Bool()
-    }.asInput
-  }""") in (q"class FrontendModule") register
+  //modifying HellaCacheArbiter
+  after (q"connectRequestorToMem()") insert (q"""
+    for (i <- 0 until n) {
+      io.requestor(i).perf := io.mem.perf
+    }
+  """) in (q"class HellaCacheArbiter") register
 
-  before (q"gateClock") insert (q"""
+  //modifying HellaCacheIO
+  extend (q"class HellaCacheIO") insert (init"HasHellaCachePerfEvents") register
+
+  //modifying Frontend
+  extend (q"class FrontendIO") insert (init"HasFrontEndPerfEvents") register
+
+  before (q"gateClock()") insert (q"""
     io.cpu.perf := icache.io.perf
     io.cpu.perf.tlbMiss := io.ptw.req.fire()
     io.errors := icache.io.errors
@@ -26,10 +31,6 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
 
   //modifying DCache
   after(q"gateClock()") insert (q"""
-    io.cpu.perf.acquire := edge.done(tl_out_a)
-    io.cpu.perf.release := edge.done(tl_out_c)
-    io.cpu.perf.grant := tl_out.d.valid && d_last
-    io.cpu.perf.tlbMiss := io.ptw.req.fire()
     io.cpu.perf.storeBufferEmptyAfterLoad := !(
       (s1_valid && s1_write) ||
       ((s2_valid && s2_write && !s2_waw_hazard) || pstore1_held) ||
@@ -43,21 +44,6 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
       (pstore2_valid && pstore1_valid_likely && (s1_valid && s1_write)))
     io.cpu.perf.canAcceptStoreThenRMW := io.cpu.perf.canAcceptStoreThenLoad && !pstore2_valid
     io.cpu.perf.canAcceptLoadThenLoad := !((s1_valid && s1_write && needsRead(s1_req)) && ((s2_valid && s2_write && !s2_waw_hazard || pstore1_held) || pstore2_valid))
-    io.cpu.perf.blocked := {
-      // stop reporting blocked just before unblocking to avoid overly conservative stalling
-      val beatsBeforeEnd = outer.crossing match {
-        case SynchronousCrossing(_) => 2
-        case RationalCrossing(_) => 1 // assumes 1 < ratio <= 2; need more bookkeeping for optimal handling of >2
-        case _: AsynchronousCrossing => 1 // likewise
-        case _: CreditedCrossing     => 1 // likewise
-      }
-      val near_end_of_refill = if (cacheBlockBytes / beatBytes <= beatsBeforeEnd) tl_out.d.valid else {
-        val refill_count = RegInit(0.U((cacheBlockBytes / beatBytes).log2.W))
-        when (tl_out.d.fire() && grantIsRefill) { refill_count := refill_count + 1 }
-        refill_count >= (cacheBlockBytes / beatBytes - beatsBeforeEnd)
-      }
-      cached_grant_wait && !near_end_of_refill
-    }
   """) in (q"class DCacheModuleImpl") register
 
   //modifying Rocket Core
@@ -121,10 +107,10 @@ class PerformanceCounterAspect (tree: Tree) extends Aspect(tree) {
 
   val sysEvents = new EventSet((mask, hits) => (mask & hits).orR, 6)
   sysEvents.addEvent("ICache miss", () => io.imem.perf.acquire, 0)
-  sysEvents.addEvent("DCache miss", () => io.dmem.perf.acquire, 1)
-  sysEvents.addEvent("DCache release", () => io.dmem.perf.release, 2)
+  sysEvents.addEvent("DCache miss", () => io.dmem.acquire, 1)
+  sysEvents.addEvent("DCache release", () => io.dmem.release, 2)
   sysEvents.addEvent("ITLB miss", () => io.imem.perf.tlbMiss, 3)
-  sysEvents.addEvent("DTLB miss", () => io.dmem.perf.tlbMiss, 4)
+  sysEvents.addEvent("DTLB miss", () => io.dmem.tlbMiss, 4)
   sysEvents.addEvent("L2 TLB miss", () => io.ptw.perf.l2miss, 5)
   perfEvents.addEventSet(sysEvents)
   """) in (q"class RocketImpl") register

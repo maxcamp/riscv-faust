@@ -10,8 +10,8 @@ class After(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = co
     new After(oldCode, newCode, newContext)
   }
 
-  def insert(newNewCode: Stat): Advice = {
-    new After(oldCode, newNewCode, context)
+  def insert(newNewCode: Tree): Advice = {
+    new After(oldCode, newNewCode.asInstanceOf[Stat], context)
   }
 
   def advise() = new Transformer {

@@ -12,7 +12,7 @@ object AspectMachine {
 
     if(args.length != 0) {
       if(args(0) == "apply") {
-        println("Applyin Aspects")
+        println("Applying Aspects")
         AspectManager(dir)((tree: Tree) => new PerformanceCounterAspect(tree)())
       } else if (args(0) == "undo"){
         println("Undo Aspects")

@@ -11,8 +11,8 @@ class Before(oldCode: Stat, newCode: Stat = q"source()", context: Defn.Class = c
     new Before(oldCode, newCode, newContext)
   }
 
-  def insert(newNewCode: Stat): Advice = {
-    new Before(oldCode, newNewCode, context)
+  def insert(newNewCode: Tree): Advice = {
+    new Before(oldCode, newNewCode.asInstanceOf[Stat], context)
   }
 
   def advise = new Transformer {
