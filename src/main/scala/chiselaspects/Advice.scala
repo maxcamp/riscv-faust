@@ -20,6 +20,7 @@ abstract class Advice(newCode: Tree, context: Defn.Class)
   //the subclass must tell us how to advise
   def advise(): Transformer
 
+  //we must always tell the aspect that the advice exists
   def register() = {
     aspect.adviceSequence = aspect.adviceSequence :+ advise()
   }

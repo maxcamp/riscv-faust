@@ -13,7 +13,10 @@ object AspectMachine {
     if(args.length != 0) {
       if(args(0) == "apply") {
         println("Applying Aspects")
-        AspectManager(dir)((tree: Tree) => new PerformanceCounterAspect(tree)())
+        AspectManager(dir)((tree: Tree) => new CounterSystemAspect(
+          new InstEventsAspect(
+            new MicroEventsAspect(
+              new SystemEventsAspect(tree)())())())())
       } else if (args(0) == "undo"){
         println("Undo Aspects")
         AspectManager.undo(dir)
