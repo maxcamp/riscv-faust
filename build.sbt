@@ -39,3 +39,11 @@ scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
 javacOptions ++= javacOptionsVersion(scalaVersion.value)
 
 libraryDependencies += "org.scalameta" %% "scalameta" % "4.3.20"
+
+libraryDependencies += "org.scala-graph" %% "graph-core" % "1.13.1"
+
+libraryDependencies += "org.scala-graph" %% "graph-constrained" % "1.13.0"
+
+libraryDependencies += "org.scala-graph" %% "graph-json" % "1.13.0"
+
+libraryDependencies += "org.scala-graph" %% "graph-dot" % "1.13.0"
