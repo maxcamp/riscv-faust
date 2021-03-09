@@ -30,19 +30,18 @@ name := "ChiselAspects"
 
 version := "0.1"
 
-scalaVersion := "2.12.10"
-
-crossScalaVersions := Seq("2.12.10", "2.11.12")
+scalaVersion := "2.13.1"
 
 scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
+scalacOptions ++= Seq("-language:postfixOps")
 
 javacOptions ++= javacOptionsVersion(scalaVersion.value)
 
 libraryDependencies += "org.scalameta" %% "scalameta" % "4.3.20"
 
-libraryDependencies += "org.scala-graph" %% "graph-core" % "1.13.1"
+libraryDependencies += "org.scala-graph" %% "graph-core" % "1.13.2"
 
-libraryDependencies += "org.scala-graph" %% "graph-constrained" % "1.13.0"
+libraryDependencies += "org.scala-graph" %% "graph-constrained" % "1.13.2"
 
 libraryDependencies += "org.scala-graph" %% "graph-json" % "1.13.0"
 

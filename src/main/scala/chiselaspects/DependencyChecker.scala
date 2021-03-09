@@ -6,41 +6,49 @@ import scalax.collection.GraphEdge._
 import scalax.collection.io.json._
 import scalax.collection.io.json.descriptor.predefined.{Di}
 
-sealed trait Features
-case class Feature(name: String) extends Features
+import net.liftweb.json._
+
+
+sealed trait Chip
+case class Feature(name: String) extends Chip
 
 class DependencyChecker() {
 
-  val (baseSystem, instEvents, microEvents, sysEvents) = (
+  val (baseSystem, counterSystem, instEvents, microEvents, sysEvents) = (
     Feature("Base System"),
+    Feature("Counter System"),
     Feature("Instruction Events"),
     Feature("Microarchitecture Events"),
     Feature("System Events")
   )
 
-  val featureGraph = Graph[Features, DiEdge] (
-    instEvents ~> baseSystem,
-    microEvents ~> baseSystem,
-    sysEvents ~> baseSystem
+  val featureGraph = Graph[Chip, DiEdge] (
+    counterSystem ~> baseSystem,
+    instEvents ~> counterSystem,
+    microEvents ~> counterSystem,
+    sysEvents ~> counterSystem
   )
 
-  val featureDescriptor = new NodeDescriptor[Feature](typeId = "Feature") {
+  val featureDescriptor = new NodeDescriptor[Feature](typeId = "Features") {
     def id(node: Any) = node match {
       case Feature(name) => name
     }
   }
 
-  val featuresDescriptor = new Descriptor[Features](
+  val chipDescriptor = new Descriptor[Chip](
     defaultNodeDescriptor = featureDescriptor,
-    defaultEdgeDescriptor = Di.descriptor[Features]()
+    defaultEdgeDescriptor = Di.descriptor[Chip](),
+    namedNodeDescriptors = Seq(featureDescriptor),
+    namedEdgeDescriptors = Seq(Di.descriptor[Chip]())
   )
 
   def apply() {
-    val export = featureGraph.toJson(featuresDescriptor)
+    val export = featureGraph.toJson(chipDescriptor)
+    val formated = prettyRender(JsonParser.parse(export))
+    println(formated)
 
-    import net.liftweb.json._
-    val pretty = prettyRender(JsonParser.parse(export))
-    println(pretty)
+    val newGraph = Graph.fromJson[Chip, DiEdge](export, chipDescriptor)
+    println(newGraph.toString())
   }
 
 }
