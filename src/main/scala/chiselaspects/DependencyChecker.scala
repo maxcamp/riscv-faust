@@ -8,47 +8,57 @@ import scalax.collection.io.json.descriptor.predefined.{Di}
 
 import net.liftweb.json._
 
+import scala.collection.immutable.Set
+import scala.io.Source
 
 sealed trait Chip
 case class Feature(name: String) extends Chip
 
-class DependencyChecker() {
-
-  val (baseSystem, counterSystem, instEvents, microEvents, sysEvents) = (
-    Feature("Base System"),
-    Feature("Counter System"),
-    Feature("Instruction Events"),
-    Feature("Microarchitecture Events"),
-    Feature("System Events")
-  )
-
-  val featureGraph = Graph[Chip, DiEdge] (
-    counterSystem ~> baseSystem,
-    instEvents ~> counterSystem,
-    microEvents ~> counterSystem,
-    sysEvents ~> counterSystem
-  )
-
-  val featureDescriptor = new NodeDescriptor[Feature](typeId = "Features") {
+object DependencyChecker {
+  private val featureDescriptor = new NodeDescriptor[Feature](typeId = "Features") {
     def id(node: Any) = node match {
       case Feature(name) => name
     }
   }
 
-  val chipDescriptor = new Descriptor[Chip](
+  private val chipDescriptor = new Descriptor[Chip](
     defaultNodeDescriptor = featureDescriptor,
-    defaultEdgeDescriptor = Di.descriptor[Chip](),
-    namedNodeDescriptors = Seq(featureDescriptor),
-    namedEdgeDescriptors = Seq(Di.descriptor[Chip]())
+    defaultEdgeDescriptor = Di.descriptor[Chip]()
   )
 
-  def apply() {
-    val export = featureGraph.toJson(chipDescriptor)
-    val formated = prettyRender(JsonParser.parse(export))
-    println(formated)
+  private val root = Feature("Base System")
 
-    val newGraph = Graph.fromJson[Chip, DiEdge](export, chipDescriptor)
-    println(newGraph.toString())
+  private val featureFilename = "features.json"
+  private val requestFilename = "request.json"
+
+  private val featureImport = Source.fromFile(featureFilename).getLines.mkString
+  private val dependencyGraph = Graph.fromJson[Chip, DiEdge](featureImport,chipDescriptor)
+
+  private val requestImport = Source.fromFile(requestFilename).getLines.mkString
+  private val requestGraph = Graph.fromJson[Chip, DiEdge](requestImport,chipDescriptor)
+
+  private val featureSet = scala.collection.mutable.Set[Feature]()
+
+  def check() = {
+    featureSet.clear()
+    for(f <- requestGraph.nodes) {
+      featureSet ++= getDependencies(f.toOuter.asInstanceOf[Feature])
+    }
+    println(featureSet)
+  }
+
+  private def getDependencies(child: Feature): scala.collection.mutable.Set[Feature] = {
+    //only go to the trouble of finding the dependencies if we haven't already seen them
+    if(child != root && !featureSet.contains(child)) {
+        //find our parents
+        for(p <- (dependencyGraph get child).diSuccessors) {
+          featureSet ++= getDependencies(p.toOuter.asInstanceOf[Feature])
+        }
+        //we depend on ourself, so add us too
+        featureSet += child
+    } else {
+      featureSet += child
+    }
   }
 
 }

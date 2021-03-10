@@ -21,7 +21,7 @@ object AspectMachine {
         println("Undo Aspects")
         AspectManager.undo(dir)
       } else if (args(0) == "depend"){
-        new DependencyChecker()()
+        DependencyChecker.check()
       } else {
         println("Please indicate either to apply or undo aspects!")
       }

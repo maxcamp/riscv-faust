@@ -1,0 +1,37 @@
+{
+  "nodes":[
+    {
+      "name":"System Events"
+    },
+    {
+      "name":"Instruction Events"
+    },
+    {
+      "name":"Base System"
+    },
+    {
+      "name":"Microarchitecture Events"
+    },
+    {
+      "name":"Counter System"
+    }
+  ],
+  "edges":[
+    {
+      "n1":"Microarchitecture Events",
+      "n2":"Counter System"
+    },
+    {
+      "n1":"Instruction Events",
+      "n2":"Counter System"
+    },
+    {
+      "n1":"Counter System",
+      "n2":"Base System"
+    },
+    {
+      "n1":"System Events",
+      "n2":"Counter System"
+    }
+  ]
+}
