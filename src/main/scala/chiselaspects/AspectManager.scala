@@ -8,14 +8,10 @@ import java.nio.file.{Files, Paths, StandardCopyOption}
 
 object AspectManager {
 
-  def apply(dir: String)(aspectFunction: Tree => Tree) = {
+  def apply(dir: String, featureList: List[String]) = {
 
-    def processTree(prevTree: Tree): Tree = {
-      //val newTree =
-        aspectFunction(prevTree)
-      //if (prevTree.isEqual(newTree)) prevTree //once aspects stop applying return the tree
-      //else processTree(newTree) //we have just applied aspects, need to check again
-    }
+    //gather the aspects that have been requested
+    val aspects = getAspects(featureList)
 
     //get all the files in the project we want to transform
     val files = getRecursiveListOfFiles(new File(dir))
@@ -35,9 +31,11 @@ object AspectManager {
       val text = new String(bytes, "UTF-8")
       val input = scala.meta.inputs.Input.VirtualFile(path.toString, text)
 
-      val originalTree = input.parse[Source].get
+      val originalTree = input.parse[Source].get.asInstanceOf[Tree]
 
-      val finalTree = processTree(originalTree)
+      //take aspect n and apply it's transform to tree n-1
+      val finalTree = (aspects.foldLeft(originalTree)
+        ((tree: Tree, aspect: Aspect) => aspect(tree)))
 
       //if we've done a transform, write a new file with the new tree
       if (!finalTree.isEqual(originalTree)) {
@@ -73,6 +71,18 @@ object AspectManager {
       mv(path, newPath)
     })
 
+  }
+
+  private def getAspects(featureList: List[String]): List[Aspect] = {
+    for (f <- featureList) yield {
+      f match {
+        case "Counter System" => new CounterSystemAspect()
+        case "Instruction Events" => new InstEventsAspect()
+        case "Microarchitecture Events" => new MicroEventsAspect()
+        case "System Events" => new SystemEventsAspect()
+        case "Base System" => new BaseSystemAspect()
+      }
+    }
   }
 
   private def getRecursiveListOfFiles(dir: File): Array[File] = {

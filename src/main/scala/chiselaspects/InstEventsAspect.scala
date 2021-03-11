@@ -5,7 +5,7 @@ import scala.meta.contrib._
 import java.io.File
 import java.io._
 
-class InstEventsAspect (tree: Tree) extends Aspect(tree) {
+class InstEventsAspect () extends Aspect {
   after(q"val perfEvents = new EventSets()") insert (q"""
   val instEvents = new EventSet((mask, hits) => Mux(wb_xcpt, mask(0), wb_valid &&
     pipelineIDToWB((mask & hits).orR)), 18)

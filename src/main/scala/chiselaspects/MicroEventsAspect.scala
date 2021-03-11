@@ -5,7 +5,7 @@ import scala.meta.contrib._
 import java.io.File
 import java.io._
 
-class MicroEventsAspect (tree: Tree) extends Aspect (tree) {
+class MicroEventsAspect () extends Aspect {
   after(q"val perfEvents = new EventSets()") insert (q"""
   val microEvents = new EventSet((mask, hits) => (mask & hits).orR, 11)
   microEvents.addEvent("load-use interlock", () => id_ex_hazard && ex_ctrl.mem

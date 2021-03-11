@@ -13,15 +13,10 @@ object AspectMachine {
     if(args.length != 0) {
       if(args(0) == "apply") {
         println("Applying Aspects")
-        AspectManager(dir)((tree: Tree) => new CounterSystemAspect(
-          new InstEventsAspect(
-            new MicroEventsAspect(
-              new SystemEventsAspect(tree)())())())())
+        AspectManager(dir, DependencyChecker())
       } else if (args(0) == "undo"){
         println("Undo Aspects")
         AspectManager.undo(dir)
-      } else if (args(0) == "depend"){
-        DependencyChecker.check()
       } else {
         println("Please indicate either to apply or undo aspects!")
       }

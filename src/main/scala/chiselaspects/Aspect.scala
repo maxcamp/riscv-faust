@@ -2,7 +2,7 @@ package chiselaspects
 
 import scala.meta._
 
-abstract class Aspect (tree: Tree){
+abstract class Aspect (){
   implicit val aspect = this
   var adviceSequence = Seq[Transformer]()
 
@@ -11,7 +11,7 @@ abstract class Aspect (tree: Tree){
   protected def extend(oldCode: Init) = new ExtendInit(oldCode)
   protected def extend(oldCode: Defn.Class) = new ExtendClass(oldCode)
 
-  def apply(): Tree = {
+  def apply(tree: Tree): Tree = {
     adviceSequence.foldLeft(tree){ (newTree, transform) => { transform(newTree) } }
   }
 

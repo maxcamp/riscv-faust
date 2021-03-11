@@ -5,7 +5,7 @@ import scala.meta.contrib._
 import java.io.File
 import java.io._
 
-class SystemEventsAspect (tree: Tree) extends Aspect(tree) {
+class SystemEventsAspect extends Aspect {
 
   //modifying PTW
   extend (q"class DatapathPTWIO") insert (init"HasPTWPerfEvents") register

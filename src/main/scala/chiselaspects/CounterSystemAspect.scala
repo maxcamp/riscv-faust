@@ -5,7 +5,7 @@ import scala.meta.contrib._
 import java.io.File
 import java.io._
 
-class CounterSystemAspect (tree: Tree) extends Aspect (tree) {
+class CounterSystemAspect () extends Aspect {
   val numPerfCounters = 28
   val haveBasicCounters = true
 
