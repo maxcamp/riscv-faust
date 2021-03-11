@@ -37,14 +37,16 @@ object DependencyChecker {
   private val requestImport = Source.fromFile(requestFilename).getLines.mkString
   private val requestGraph = Graph.fromJson[Chip, DiEdge](requestImport,chipDescriptor)
 
+  //not very functional, but object oriented
   private val featureSet = scala.collection.mutable.Set[Feature]()
 
-  def check() = {
+  def apply(): List[String] = {
     featureSet.clear()
     for(f <- requestGraph.nodes) {
       featureSet ++= getDependencies(f.toOuter.asInstanceOf[Feature])
     }
-    println(featureSet)
+
+    for (f <- featureSet.toList) yield f.name
   }
 
   private def getDependencies(child: Feature): scala.collection.mutable.Set[Feature] = {
