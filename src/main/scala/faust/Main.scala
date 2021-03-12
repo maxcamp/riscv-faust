@@ -8,7 +8,7 @@ import java.io._
 object FeatureMachine {
   def main(args: Array[String]): Unit = {
 
-    val dir = sys.env.get("CHISELDIR").getOrElse("")
+    val dir = sys.env.get("SCALADIR").getOrElse("")
 
     if (!dir.isEmpty) {
       if(args.length != 0) {
