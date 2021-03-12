@@ -8,20 +8,24 @@ import java.io._
 object AspectMachine {
   def main(args: Array[String]): Unit = {
 
-    val dir = "/home/whytheam/Research/chisel/freedom/rocket-chip/src/main/scala"
+    val dir = sys.env.get("CHISELDIR").getOrElse("")
 
-    if(args.length != 0) {
-      if(args(0) == "apply") {
-        println("Applying Aspects")
-        AspectManager(dir, DependencyChecker())
-      } else if (args(0) == "undo"){
-        println("Undo Aspects")
-        AspectManager.undo(dir)
+    if (!dir.isEmpty) {
+      if(args.length != 0) {
+        if(args(0) == "apply") {
+          println("Applying features in " + dir)
+          AspectManager(dir, DependencyChecker())
+        } else if (args(0) == "undo"){
+          println("Undo features in " + dir)
+          AspectManager.undo(dir)
+        } else {
+          println("Please indicate either to apply or undo aspects!")
+        }
       } else {
         println("Please indicate either to apply or undo aspects!")
       }
     } else {
-      println("Please indicate either to apply or undo aspects!")
+      println("Plase set CHISELDIR to the location of your Chisel code!")
     }
   }
 }
