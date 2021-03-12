@@ -1,14 +1,14 @@
-#Faust: Feature Application Using Scala Trees#
+# Faust: Feature Application Using Scala Trees #
 
 **Faust** is a metaprogramming framework for applying features in Scala code. It provides
 a small domain specific language for feature designation, feature dependency checking, and
 automatic application of features to a code directory.
 
-##Creating a new Feature##
+## Creating a new Feature ##
 To create a new feature in Faust, one first needs to extend the `Feature` class. A `Feature`
 class represents one isolated feature that can be optionally applied to the code base.
 
-###Feature Building Language###
+### Feature Building Language ###
 Inside the `Feature` class a feature is built using a special syntax that we provide. A
 feature is made of _advice_. Advice tells the framework where and what code needs to be
 applied to code to implement the feature. There are three types of advice that can be
@@ -55,13 +55,13 @@ class CounterSystemFeature () extends Feature {
 }
 ```
 
-###Adding Dependencies###
+### Adding Dependencies ###
 Currently users must manually add the dependency relationships to the system. However, we
 have plans to automate this in the future. New dependency information must be added to
 `feature.json` and the correct class containing your custom feature must be added to
 `DependencyChecher.scala`.
 
-##Applying Features##
+## Applying Features ##
 The directory you wish to apply features to must be designated in the enviroment variable
 `SCALADIR`.
 
@@ -69,7 +69,7 @@ A particular set of features can be requested by adding them in `request.json`. 
 features in [sbt](https://www.scala-sbt.org/) call `run apply`. To return your code to its
 original state call `run undo`.
 
-##Included Features##
+## Included Features ##
 Currently, our example features are for [Rocket Chip](https://github.com/chipsalliance/rocket-chip)
 which is written in [Chisel](https://www.chisel-lang.org/). However, this framework _should_
 work with any Scala code or any DSL embedded in Scala.
