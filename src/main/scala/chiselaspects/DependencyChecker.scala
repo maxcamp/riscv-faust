@@ -1,4 +1,4 @@
-package chiselaspects
+package faust
 
 import scalax.collection._
 import scalax.collection.GraphPredef._
@@ -11,55 +11,55 @@ import net.liftweb.json._
 import scala.collection.immutable.Set
 import scala.io.Source
 
-sealed trait Chip
-case class Feature(name: String) extends Chip
+sealed trait System
+case class SystemFeature(name: String) extends System
 
 object DependencyChecker {
-  private val featureDescriptor = new NodeDescriptor[Feature](typeId = "Features") {
+  private val systemFeatureDescriptor = new NodeDescriptor[SystemFeature](typeId = "SystemFeatures") {
     def id(node: Any) = node match {
-      case Feature(name) => name
+      case SystemFeature(name) => name
     }
   }
 
-  private val chipDescriptor = new Descriptor[Chip](
-    defaultNodeDescriptor = featureDescriptor,
-    defaultEdgeDescriptor = Di.descriptor[Chip]()
+  private val systemDescriptor = new Descriptor[System](
+    defaultNodeDescriptor = systemFeatureDescriptor,
+    defaultEdgeDescriptor = Di.descriptor[System]()
   )
 
-  private val root = Feature("Base System")
+  private val root = SystemFeature("Base System")
 
-  private val featureFilename = "features.json"
+  private val systemFeatureFilename = "features.json"
   private val requestFilename = "request.json"
 
-  private val featureImport = Source.fromFile(featureFilename).getLines.mkString
-  private val dependencyGraph = Graph.fromJson[Chip, DiEdge](featureImport,chipDescriptor)
+  private val systemFeatureImport = Source.fromFile(systemFeatureFilename).getLines.mkString
+  private val dependencyGraph = Graph.fromJson[System, DiEdge](systemFeatureImport,systemDescriptor)
 
   private val requestImport = Source.fromFile(requestFilename).getLines.mkString
-  private val requestGraph = Graph.fromJson[Chip, DiEdge](requestImport,chipDescriptor)
+  private val requestGraph = Graph.fromJson[System, DiEdge](requestImport,systemDescriptor)
 
   //not very functional, but object oriented
-  private val featureSet = scala.collection.mutable.Set[Feature]()
+  private val systemFeatureSet = scala.collection.mutable.Set[SystemFeature]()
 
   def apply(): List[String] = {
-    featureSet.clear()
+    systemFeatureSet.clear()
     for(f <- requestGraph.nodes) {
-      featureSet ++= getDependencies(f.toOuter.asInstanceOf[Feature])
+      systemFeatureSet ++= getDependencies(f.toOuter.asInstanceOf[SystemFeature])
     }
 
-    for (f <- featureSet.toList) yield f.name
+    for (f <- systemFeatureSet.toList) yield f.name
   }
 
-  private def getDependencies(child: Feature): scala.collection.mutable.Set[Feature] = {
+  private def getDependencies(child: SystemFeature): scala.collection.mutable.Set[SystemFeature] = {
     //only go to the trouble of finding the dependencies if we haven't already seen them
-    if(child != root && !featureSet.contains(child)) {
+    if(child != root && !systemFeatureSet.contains(child)) {
         //find our parents
         for(p <- (dependencyGraph get child).diSuccessors) {
-          featureSet ++= getDependencies(p.toOuter.asInstanceOf[Feature])
+          systemFeatureSet ++= getDependencies(p.toOuter.asInstanceOf[SystemFeature])
         }
         //we depend on ourself, so add us too
-        featureSet += child
+        systemFeatureSet += child
     } else {
-      featureSet += child
+      systemFeatureSet += child
     }
   }
 

@@ -1,11 +1,11 @@
-package chiselaspects
+package faust
 
 import scala.meta._
 import scala.meta.contrib._
 import java.io.File
 import java.io._
 
-class InstEventsAspect () extends Aspect {
+class InstEventsFeature () extends Feature {
   after(q"val perfEvents = new EventSets()") insert (q"""
   val instEvents = new EventSet((mask, hits) => Mux(wb_xcpt, mask(0), wb_valid &&
     pipelineIDToWB((mask & hits).orR)), 18)

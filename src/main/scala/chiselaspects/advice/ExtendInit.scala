@@ -1,9 +1,9 @@
-package chiselaspects
+package faust
 
 import scala.meta._
 import scala.meta.contrib._
 
-class ExtendInit(oldCode: Init, newCode: Stat = q"source()", context: Defn.Class = const.NullClass)(implicit aspect: Aspect)
+class ExtendInit(oldCode: Init, newCode: Stat = q"source()", context: Defn.Class = const.NullClass)(implicit feature: Feature)
   extends Advice(newCode, context) {
 
   def in(newContext: Defn.Class): Advice = {

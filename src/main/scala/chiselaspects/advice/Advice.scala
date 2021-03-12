@@ -1,4 +1,4 @@
-package chiselaspects
+package faust
 
 import scala.meta._
 import scala.meta.contrib._
@@ -9,7 +9,7 @@ package object const {
 }
 
 abstract class Advice(newCode: Tree, context: Defn.Class)
-  (implicit aspect: Aspect) {
+  (implicit feature: Feature) {
 
   //the subclass must tell us what to do with a new context
   def in(newConext: Defn.Class): Advice
@@ -20,8 +20,8 @@ abstract class Advice(newCode: Tree, context: Defn.Class)
   //the subclass must tell us how to advise
   def advise(): Transformer
 
-  //we must always tell the aspect that the advice exists
+  //we must always tell the feature that the advice exists
   def register() = {
-    aspect.adviceList += advise()
+    feature.adviceList += advise()
   }
 }

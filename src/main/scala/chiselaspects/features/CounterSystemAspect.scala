@@ -1,11 +1,11 @@
-package chiselaspects
+package faust
 
 import scala.meta._
 import scala.meta.contrib._
 import java.io.File
 import java.io._
 
-class CounterSystemAspect () extends Aspect {
+class CounterSystemFeature () extends Feature {
   val numPerfCounters = 28
   val haveBasicCounters = true
 

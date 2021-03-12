@@ -1,4 +1,4 @@
-package chiselaspects
+package faust
 
 import scala.meta._
 import scala.meta.contrib._
@@ -6,12 +6,12 @@ import java.io.File
 import java.io._
 import java.nio.file.{Files, Paths, StandardCopyOption}
 
-object AspectManager {
+object FeatureManager {
 
   def apply(dir: String, featureList: List[String]) = {
 
-    //gather the aspects that have been requested
-    val aspects = getAspects(featureList)
+    //gather the features that have been requested
+    val features = getFeatures(featureList)
 
     //get all the files in the project we want to transform
     val files = getRecursiveListOfFiles(new File(dir))
@@ -33,9 +33,9 @@ object AspectManager {
 
       val originalTree = input.parse[Source].get.asInstanceOf[Tree]
 
-      //take aspect n and apply it's transform to tree n-1
-      val finalTree = (aspects.foldLeft(originalTree)
-        ((tree: Tree, aspect: Aspect) => aspect(tree)))
+      //take feature n and apply it's transform to tree n-1
+      val finalTree = (features.foldLeft(originalTree)
+        ((tree: Tree, feature: Feature) => feature(tree)))
 
       //if we've done a transform, write a new file with the new tree
       if (!finalTree.isEqual(originalTree)) {
@@ -73,14 +73,14 @@ object AspectManager {
 
   }
 
-  private def getAspects(featureList: List[String]): List[Aspect] = {
+  private def getFeatures(featureList: List[String]): List[Feature] = {
     for (f <- featureList) yield {
       f match {
-        case "Counter System" => new CounterSystemAspect()
-        case "Instruction Events" => new InstEventsAspect()
-        case "Microarchitecture Events" => new MicroEventsAspect()
-        case "System Events" => new SystemEventsAspect()
-        case "Base System" => new BaseSystemAspect()
+        case "Counter System" => new CounterSystemFeature()
+        case "Instruction Events" => new InstEventsFeature()
+        case "Microarchitecture Events" => new MicroEventsFeature()
+        case "System Events" => new SystemEventsFeature()
+        case "Base System" => new BaseSystemFeature()
       }
     }
   }

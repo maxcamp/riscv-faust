@@ -1,9 +1,9 @@
-package chiselaspects
+package faust
 
 import scala.meta._
 
-abstract class Aspect (){
-  implicit val aspect = this
+abstract class Feature (){
+  implicit val feature = this
   val adviceList = scala.collection.mutable.ListBuffer[Transformer]()
 
   protected def before(oldCode: Stat) = new Before(oldCode)

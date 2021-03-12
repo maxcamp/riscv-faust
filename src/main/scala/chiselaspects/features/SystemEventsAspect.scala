@@ -1,11 +1,11 @@
-package chiselaspects
+package faust
 
 import scala.meta._
 import scala.meta.contrib._
 import java.io.File
 import java.io._
 
-class SystemEventsAspect extends Aspect {
+class SystemEventsFeature extends Feature {
 
   //modifying PTW
   extend (q"class DatapathPTWIO") insert (init"HasPTWPerfEvents") register
