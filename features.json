@@ -17,6 +17,9 @@
     },
     {
       "name":"Accum Event"
+    },
+    {
+      "name":"Stats Counters"
     }
   ],
   "edges":[
@@ -38,6 +41,10 @@
     },
     {
       "n1":"Accum Event",
+      "n2":"Counter System"
+    },
+    {
+      "n1":"Stats Counters"
       "n2":"Counter System"
     }
   ]

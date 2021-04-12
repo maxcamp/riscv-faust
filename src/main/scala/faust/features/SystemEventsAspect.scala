@@ -2,8 +2,6 @@ package faust
 
 import scala.meta._
 import scala.meta.contrib._
-import java.io.File
-import java.io._
 
 class SystemEventsFeature extends Feature {
 

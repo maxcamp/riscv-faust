@@ -1,13 +1,10 @@
 {
   "nodes":[
     {
-      "name":"System Events"
-    },
-    {
       "name":"Instruction Events"
     },
     {
-      "name":"Accum Event"
+      "name":"Stats Counters"
     }
   ]
 }
