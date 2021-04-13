@@ -16,7 +16,7 @@ class CounterSystemFeature () extends Feature {
   val stat = q"${mod"override"} val counters = Vec(${numPerfCounters}, new PerfCounterIO)"
   extend (init"CSRFileIO") insert (q"{ $stat }") in CSRContext register
 
-  before (q"buildMappings()") insert (q"val performanceCounters = new PerformanceCounters(perfEventSets, this, ${numPerfCounters})") in CSRContext register
+  before (q"buildMappings()") insert (q"val performanceCounters = new DirectPerformanceCounters(perfEventSets, this, ${numPerfCounters})") in CSRContext register
 
   after(q"buildMappings()") insert q"performanceCounters.buildMappings()" in CSRContext register
 

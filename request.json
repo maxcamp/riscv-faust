@@ -2,9 +2,6 @@
   "nodes":[
     {
       "name":"Instruction Events"
-    },
-    {
-      "name":"Stats Counters"
     }
   ]
 }
