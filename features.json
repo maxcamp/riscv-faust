@@ -20,6 +20,9 @@
     },
     {
       "name":"Stats Counters"
+    },
+    {
+      "name":"Direct Counters"
     }
   ],
   "edges":[
@@ -45,6 +48,10 @@
     },
     {
       "n1":"Stats Counters"
+      "n2":"Counter System"
+    },
+    {
+      "n1":"Direct Counters"
       "n2":"Counter System"
     }
   ]

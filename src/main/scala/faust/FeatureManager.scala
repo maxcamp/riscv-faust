@@ -76,6 +76,7 @@ object FeatureManager {
   private def getFeatures(featureList: List[String]): List[Feature] = {
     for (f <- featureList) yield {
       f match {
+        case "Direct Counters" => new DirectCountersFeature()
         case "Stats Counters" => new StatsCountersFeature()
         case "Accum Event" => new AccumEventFeature()
         case "Counter System" => new CounterSystemFeature()
