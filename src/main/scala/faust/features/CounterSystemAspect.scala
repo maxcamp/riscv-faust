@@ -4,7 +4,7 @@ import scala.meta._
 import scala.meta.contrib._
 
 class CounterSystemFeature () extends Feature {
-  val numPerfCounters = 4
+  val numPerfCounters = 29
 
   //modifying Rocket Core
   val RocketCoreContext = q"class RocketImpl"
@@ -16,7 +16,7 @@ class CounterSystemFeature () extends Feature {
   val stat = q"${mod"override"} val counters = Vec(${numPerfCounters}, new PerfCounterIO)"
   extend (init"CSRFileIO") insert (q"{ $stat }") in CSRContext register
 
-  before (q"buildMappings()") insert (q"val numRealCounters = ${numPerfCounters}") in CSRContext register
+  before (q"buildMappings()") insert (q"val numPerfCounters = ${numPerfCounters}") in CSRContext register
 
   after(q"buildMappings()") insert q"performanceCounters.buildMappings()" in CSRContext register
 

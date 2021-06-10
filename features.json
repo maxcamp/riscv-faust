@@ -23,6 +23,9 @@
     },
     {
       "name":"Direct Counters"
+    },
+    {
+      "name":"PC Counters"
     }
   ],
   "edges":[
@@ -52,6 +55,10 @@
     },
     {
       "n1":"Direct Counters"
+      "n2":"Counter System"
+    },
+    {
+      "n1":"PC Counters"
       "n2":"Counter System"
     }
   ]
