@@ -31,7 +31,7 @@ class ExtendClass(oldCode: Defn.Class, newCode: Init = const.NullInit, context: 
     }
   }
 
-  private def applyCode = new Transformer {
+  def applyCode = new Transformer {
     override def apply(tree: Tree): Tree = {
       tree match {
         case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $oldTemplate"
