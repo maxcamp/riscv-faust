@@ -18,7 +18,12 @@ class CounterSystemFeature () extends Feature {
 
   before (q"buildMappings()") insert (q"val numPerfCounters = ${numPerfCounters}") in CSRContext register
 
-  after(q"buildMappings()") insert q"performanceCounters.buildMappings()" in CSRContext register
+  after (q"buildMappings()") insert q"performanceCounters.buildMappings()" in CSRContext register
+
+  around (q"def allowCounter() = false.B") insert q"""
+  val counter_addr = io_dec.csr(log2Ceil(performanceCounters.read_mcounteren.getWidth)-1, 0)
+  def allowCounter() = (reg_mstatus.prv > PRV.S || performanceCounters.read_mcounteren(counter_addr)) && (!usingSupervisor || reg_mstatus.prv >= PRV.S || performanceCounters.read_scounteren(counter_addr))
+  """ in CSRContext register
 
   before (q"buildDecode()") insert (q"performanceCounters.buildDecode()") in CSRContext register
 }

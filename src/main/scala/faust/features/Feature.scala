@@ -8,6 +8,7 @@ abstract class Feature (){
 
   protected def before(oldCode: Stat) = new Before(oldCode)
   protected def after(oldCode: Stat) = new After(oldCode)
+  protected def around(oldCode: Stat) = new Around(oldCode)
   protected def extend(oldCode: Init) = new ExtendInit(oldCode)
   protected def extend(oldCode: Defn.Class) = new ExtendClass(oldCode)
 

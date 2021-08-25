@@ -32,7 +32,7 @@ class ExtendInit(oldCode: Init, newCode: Stat = q"source()", context: Defn.Class
     override def apply(tree: Tree): Tree = {
       val q"{ ..$insertStats }" = newCode
       tree match {
-        case q"new $init { ..$stats }" if (init.isEqual(oldCode)) => q"new $init { ..${insertStats ++ insertStats} }"
+        case q"new $init { ..$stats }" if (init.isEqual(oldCode)) => q"new $init { ..${insertStats ++ stats} }"
         case q"new $init" if (init.isEqual(oldCode)) => q"new $init { ..$insertStats }"
         case _ => super.apply(tree)
       }
